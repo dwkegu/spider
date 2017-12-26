@@ -1,6 +1,6 @@
 package com.dwkegu.spiderlib;
 
-import com.dwkegu.spiderlib.BaseFrame.AddressItem;
+import com.dwkegu.spiderlib.BaseFrame.IAddressItem;
 import com.dwkegu.spiderlib.BaseFrame.CrawlerBase;
 
 import java.io.IOException;
@@ -11,8 +11,17 @@ import java.util.Map;
  */
 
 public class PageCrawler extends CrawlerBase {
+
+	public PageCrawler() {
+		super();
+	}
+
+	public PageCrawler(int threadCount) {
+		super(threadCount);
+	}
+
 	@Override
-	public void crawl(AddressItem url, Map<String, String> args) {
+	public void crawl(IAddressItem url, Map<String, String> args) {
 		if(url!=null){
 			try {
 				PageResponse response = get(url.getUrl());

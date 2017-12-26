@@ -2,13 +2,13 @@ package com.dwkegu.spiderlib;
 
 
 
-import com.dwkegu.spiderlib.BaseFrame.CrawlerBase;
+import com.dwkegu.spiderlib.log.FileLogger;
+import com.dwkegu.spiderlib.save.FileSaver;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import okhttp3.*;
-import okhttp3.logging.HttpLoggingInterceptor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -17,7 +17,6 @@ import org.jsoup.select.Elements;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
-import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.*;
 

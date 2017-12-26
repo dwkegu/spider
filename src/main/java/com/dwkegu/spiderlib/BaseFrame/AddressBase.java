@@ -8,7 +8,7 @@ import java.util.Queue;
  * Created by dwkeg on 2017/12/8.
  */
 
-public abstract class AddressBase<T extends AddressItem> {
+public abstract class AddressBase<T extends IAddressItem> {
     protected int initSize;
     protected Queue<T> urlBase;
     public enum CrawlDirection{
@@ -30,10 +30,18 @@ public abstract class AddressBase<T extends AddressItem> {
     }
 
     /**
-     * get item url
-     * @return URL
+     * save method for multi thread crawler
+     * @return addressItem
      */
-    public abstract T getItem();
+    public synchronized T getItemSync(){
+        return getItem();
+    }
+
+    /**
+     * get item url
+     * @return addressItem
+     */
+    protected abstract T getItem();
 
     /**
      *add item url
@@ -49,11 +57,13 @@ public abstract class AddressBase<T extends AddressItem> {
     public abstract void putItem(T url, int level);
 
     private boolean hasMore = true;
-    public void noMore(){
+    public synchronized void noMore(){
         hasMore = false;
     }
     public boolean hasMore(){
-        return hasMore && urlBase.size() > 0;
+        synchronized (this){
+            return hasMore || urlBase.size() > 0;
+        }
     }
 
 }

@@ -1,4 +1,4 @@
-package com.dwkegu.spiderlib;
+package com.dwkegu.spiderlib.log;
 
 import java.io.IOException;
 import java.util.logging.FileHandler;

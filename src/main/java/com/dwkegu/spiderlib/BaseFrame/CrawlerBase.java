@@ -1,7 +1,5 @@
 package com.dwkegu.spiderlib.BaseFrame;
 
-import com.dwkegu.spiderlib.PageArriveListener;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,9 +17,12 @@ import okhttp3.Response;
 
 public class CrawlerBase {
 	private AddressBase hub;
-	public List<PageArriveListener> listeners;
+	private List<PageArriveListener> listeners;
 	private OkHttpClient client;
-	boolean stop;
+	private Thread[] executors;
+	private int threadCount;
+	private boolean stop;
+	private List<IAddressItem> newUrl;
 
 	public void stop(){
 		stop = true;
@@ -32,11 +33,31 @@ public class CrawlerBase {
 	}
 	protected MediaType JSON
 			= MediaType.parse("application/json; charset=utf-8");
+
+	/**
+	 * 默认线程数量为1
+	 */
 	public CrawlerBase(){
-		client = new OkHttpClient();
-		stop = false;
+		this.threadCount = 1;
+        init();
 	}
-	public void crawl(AddressItem url, Map<String, String> args){
+
+	private void init(){
+        client = new OkHttpClient();
+        executors = new Thread[threadCount];
+        stop = false;
+        newUrl = new ArrayList<>();
+    }
+
+	/**
+	 * 网页爬取
+	 * @param threadCount 线程数量
+	 */
+	public CrawlerBase(int threadCount){
+		this.threadCount = threadCount;
+        init();
+	}
+	public void crawl(IAddressItem url, Map<String, String> args){
 		try {
 			PageResponse response = get(url.getUrl());
 			newPage(url, response);
@@ -45,27 +66,30 @@ public class CrawlerBase {
 		}
 	}
 	public void startCrawl(){
-		Thread crawlThread = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				while(!stop){
-					if(!hub.hasMore()){
-						stop=true;
-						break;
-					}
-					AddressItem url = hub.getItem();
-					if(url!=null){
-						crawl(url,null);
-					}
-					try {
-						Thread.sleep(10);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		});
-		crawlThread.start();
+		for(Thread item:executors){
+		    item = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    while(!stop){
+                        if(!hub.hasMore()){
+                            stop=true;
+                            break;
+                        }
+                        IAddressItem url = hub.getItemSync();
+                        if(url!=null){
+                            crawl(url,null);
+                        }
+                        try {
+                            Thread.sleep(10);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            });
+		    item.start();
+        }
+
 	}
 	public void addOnPageArriveListener(PageArriveListener listener){
 		if(listeners==null){
@@ -93,7 +117,7 @@ public class CrawlerBase {
 		}
 	}
 
-	protected void newPage(AddressItem url, PageResponse response){
+	protected void newPage(IAddressItem url, PageResponse response){
 		for(PageArriveListener listener:listeners){
 			listener.onPageArrive(url,response.body, response.code);
 		}
